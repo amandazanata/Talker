@@ -2,8 +2,8 @@ const fs = require('fs').promises;
 const path = require('path');
 
 async function readTalkerFile() {
+    const data = await fs.readFile(path.resolve(__dirname, './talker.json'));
     try {
-        const data = await fs.readFile(path.resolve(__dirname, './talker.json'));
         const result = JSON.parse(data);
         return result;
     } catch (error) {
