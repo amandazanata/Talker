@@ -1,5 +1,5 @@
 const express = require('express');
-const { readTalkerFile } = require('../utils');
+const { readTalkerFile } = require('../fsUtils');
 
 const route = express.Router();
 
@@ -19,10 +19,10 @@ route.get('/:id', async (req, res) => {
   const data = await readTalkerFile();
   const speaker = data.find((talker) => talker.id === Number(req.params.id));
 
-  if (!speaker) {
-    return res.status(404).send({ message: 'Pessoa palestrante não encontrada' });
+  if (speaker) {
+    return res.status(200).json(speaker);
   }
-  return res.status(200).json(speaker);
+  return res.status(404).send({ message: 'Pessoa palestrante não encontrada' });
 });
 
 // requisito 5
