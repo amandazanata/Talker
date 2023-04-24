@@ -1,6 +1,7 @@
 const fs = require('fs').promises;
 const path = require('path');
 
+// Função de leitura do arquivo .json com módulo fs
 async function readTalkerFile() {
     const data = await fs.readFile(path.resolve(__dirname, './talker.json'));
     try {

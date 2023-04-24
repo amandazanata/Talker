@@ -1,57 +1,40 @@
-// const validator = require('validator');
+// VALIDA CAMPOS LOGIN
+const valida = (req, res, next) => {
+    const { email, password } = req.body;
 
-// VALIDAÇÃO DO CAMPO EMAIL
-const validaEmail = (req, _res, next) => {
-    const getBody = req.body;
+    if (!email) return res.status(400).json({ message: 'O campo "email" é obrigatório' });
+    
+    if (!password) return res.status(400).json({ message: 'O campo "password" é obrigatório' });
 
-    const property = ['email'];
-
-    if (!(property in getBody)) {
-        return next({ message: 'O campo "email" é obrigatório', statusCode: 400 });
-    }
-    return next();
+    next();
 };
 
-// VALIDAÇÃO DO FORMATO DO EMAIL
-const validaCorpoEmail = (req, _res, next) => {
+// VALIDAÇÃO DO CAMPO EMAIL
+const validaEmail = (req, res, next) => {
     const { email } = req.body;
 
-    const emailProperty = email.includes('@');
-    // validator.isEmail(email);
+    const emailProperty = /^[a-z0-9.]+@[a-z0-9]+\.[a-z]+\.([a-z]+)?$/i;
 
-    if (emailProperty !== email) {
-        return next({ message: 'O "email" deve ter o formato "email@email.com"', statusCode: 400 });
+    if (!emailProperty.test(email)) {
+        return res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
     }
-    return next();
+
+    next();
 };
 
 // VALIDAÇÃO DO CAMPO PASSWORD
-const validaPassword = (req, _res, next) => {
-    const getBody = req.body;
-
-    const property = ['password'];
-
-    if (!(property in getBody)) {
-        return next({ message: 'O campo "password" é obrigatório', statusCode: 400 });
-    }
-    return next();
-};
-
-// VALIDAÇÃO DE CARACTERES DO PASSWORD
-const validaCaracPassword = (req, _res, next) => {
+const validaPassword = (req, res, next) => {
     const { password } = req.body;
 
-    const passwordProperty = password >= 6;
-
-    if (!passwordProperty) {
-        return next({ message: 'O "password" deve ter pelo menos 6 caracteres', statusCode: 400 });
+    if (!password.length < 6) {
+        return res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
     }
-    return next();
+
+    next();
 };
 
 module.exports = {
+    valida,
     validaEmail,
-    validaCorpoEmail,
     validaPassword,
-    validaCaracPassword,
 };
