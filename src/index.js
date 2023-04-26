@@ -14,7 +14,7 @@ const {
   valiRate,
 } = require('./middlewares/talkerValidations');
 
-const readJson = fs.readFile(path.resolve(__dirname, './talker.json'));
+const readJson = () => fs.readFile(path.resolve(__dirname, './talker.json'));
 
 /* const talkier = async (talker) => {
   const allTalkers = await readJson;
@@ -32,7 +32,7 @@ const PORT = process.env.PORT || '3001';
 
 // Função de leitura do arquivo .json com módulo fs
 const readTalkerFile = async () => {
-  const data = await readJson;
+  const data = await readJson();
   try {
       const result = JSON.parse(data);
       return result;
@@ -95,6 +95,6 @@ valiRate, async (req, res) => {
     talk,
   };
   const talkTalker = JSON.stringify([...talkerJson, newTalker]);
-  await fs.writeFile(readJson, talkTalker);
+  await fs.writeFile(path.resolve(__dirname, './talker.json'), talkTalker);
   return res.status(201).json(newTalker);
 });
