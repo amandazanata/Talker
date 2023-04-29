@@ -98,3 +98,31 @@ valiRate, async (req, res) => {
   await fs.writeFile(path.resolve(__dirname, './talker.json'), talkTalker);
   return res.status(201).json(newTalker);
 });
+
+// Crie o endpoint PUT /talker/:id - não passava porque esqueci de colocar as validações
+app.put('/talker/:id',
+auth,
+validaNome,
+validaIdade,
+validaTalk,
+validaWatchedAt,
+valiRate, async (req, res) => {
+  const { id } = req.params;
+  const { name, age, talk: { watchedAt, rate } } = req.body;
+
+  const talkerJson = await readTalkerFile();
+  const speaker = talkerJson.findIndex((talker) => talker.id === Number(id));
+  
+  if (speaker === -1) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+
+  talkerJson[speaker] = {
+    id: Number(id),
+    name,
+    age,
+    talk: { watchedAt, rate },
+  };
+
+  await fs.writeFile((path
+    .resolve(__dirname, './talker.json')), JSON.stringify(talkerJson, null, 2)); // Zambs ajudou no requisito anterior, usei a mesma forma
+    return res.status(200).json(talkerJson[speaker]);
+  });
