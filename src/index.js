@@ -126,3 +126,12 @@ valiRate, async (req, res) => {
     .resolve(__dirname, './talker.json')), JSON.stringify(talkerJson, null, 2)); // Zambs ajudou no requisito anterior, usei a mesma forma
     return res.status(200).json(talkerJson[speaker]);
   });
+
+// Cria o endpoint DELETE /talker/:id - gabarito course, dia 4.4
+app.delete('/talker/:id', auth, async (req, res) => {
+  const id = Number(req.params.id);
+  const talkerJson = await readTalkerFile();
+  const talkerId = talkerJson.find((talker) => talker.id !== id);
+  await fs.writeFile((path.resolve(__dirname, './talker.json')), JSON.stringify(talkerId));
+  res.sendStatus(204);
+  });
