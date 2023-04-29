@@ -64,6 +64,18 @@ const validaWatchedAt = (req, res, next) => {
     next();
 };
 
+const validaDataQuery = (req, res, next) => {
+    const { date } = req.query;
+    const valiDate = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+
+    if (date && !valiDate.test(date)) {
+        return res.status(400)
+        .json({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
+    }
+
+    next();
+};
+
 // https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger
 const valiRate = (req, res, next) => {
     const { talk } = req.body;
@@ -82,11 +94,25 @@ const valiRate = (req, res, next) => {
     next();
 };
 
+const validaRateQuery = (req, res, next) => {
+    const { rate } = req.query;
+    const invalid = () => (!Number.isInteger(Number(rate)) || Number(rate) < 1 || Number(rate) > 5);
+
+    if (invalid && rate !== undefined) {
+        return res.status(400)
+            .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+    }
+
+    next();
+};
+
 module.exports = {
     auth,
     validaNome,
     validaIdade,
     validaTalk,
     validaWatchedAt,
+    validaDataQuery,
     valiRate,
+    validaRateQuery,
 };

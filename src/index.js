@@ -11,18 +11,12 @@ const {
   validaIdade,
   validaTalk,
   validaWatchedAt,
+  validaDataQuery,
   valiRate,
+  validaRateQuery,
 } = require('./middlewares/talkerValidations');
 
 const readJson = () => fs.readFile(path.resolve(__dirname, './talker.json'));
-
-/* const talkier = async (talker) => {
-  const allTalkers = await readJson;
-  allTalkers.push(talker);
-  const talkTalker = JSON.stringify(allTalkers, null, 2);
-  await fs.writeFile(readJson, talkTalker);
-  return talker;
-}; */
 
 const app = express();
 app.use(express.json());
@@ -60,6 +54,23 @@ app.get('/talker', async (_req, res) => {
   }
   return res.status(200).json(array);
 });
+
+  // Crie o endpoint GET /talker/search & q=searchTerm & rate=rateNumber & date=watchedDate
+  app.get('/talker/search', auth, validaRateQuery, validaDataQuery, async (req, res) => {
+    const { q, rate, date } = req.query;
+    let data = await readTalkerFile();
+  
+    if (q) {
+      data = data.filter((talker) => talker.name.includes(q));
+    }
+    if (rate) {
+      data = data.filter(({ talker }) => talker.rate === Number(rate));
+    }
+    if (date) {
+      data = data.filter(({ talker }) => talker.watchedAt === date);
+    }
+    return res.status(200).json(data);
+  });
 
 // Crie o endpoint GET /talker/:id
 app.get('/talker/:id', async (req, res) => {
