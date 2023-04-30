@@ -16,7 +16,7 @@ const {
   validaDataQuery,
   valiRate,
   validaRateQuery,
-  /* validaPatch, */
+  validaPatch,
 } = require('./middlewares/talkerValidations');
 
 const readJson = () => fs.readFile(jsonDoc, 'utf8');
@@ -108,7 +108,7 @@ valiRate, async (req, res) => {
     talk,
   };
   const talkTalker = JSON.stringify([...talkerJson, newTalker]);
-  await fs.writeFile(path.resolve(__dirname, './talker.json'), talkTalker);
+  await fs.writeFile(jsonDoc, talkTalker);
   return res.status(201).json(newTalker);
 });
 
@@ -135,8 +135,7 @@ valiRate, async (req, res) => {
     talk: { watchedAt, rate },
   };
 
-  await fs.writeFile((path
-    .resolve(__dirname, './talker.json')), JSON.stringify(talkerJson, null, 2)); // Zambs ajudou no requisito anterior, usei a mesma forma
+  await fs.writeFile(jsonDoc, JSON.stringify(talkerJson, null, 2)); // Zambs ajudou no requisito anterior, usei a mesma forma
     return res.status(200).json(talkerJson[speaker]);
 });
 
@@ -145,18 +144,18 @@ app.delete('/talker/:id', auth, async (req, res) => {
   const id = Number(req.params.id);
   const talkerJson = await readTalkerFile();
   const talkerId = talkerJson.find((talker) => talker.id !== id);
-  await fs.writeFile((path.resolve(__dirname, './talker.json')), JSON.stringify(talkerId));
+  await fs.writeFile(jsonDoc, JSON.stringify(talkerId));
   res.sendStatus(204);
-  });
+});
 
 // Crie o endpoint PATCH /talker/rate/:id
-/* app.patch('/talker/rate/:id', auth, validaPatch, async (req, res) => {
+app.patch('/talker/rate/:id', auth, validaPatch, async (req, res) => {
   const { id } = req.params;
   const { rate } = req.body;
   const talkerJson = await readTalkerFile();
   const talkerId = talkerJson.find((talker) => talker.id === +id);
   talkerId.talk.rate = rate;
   const talkTalker = JSON.stringify([talkerId]);
-  await fs.writeFile(path.resolve(__dirname, './talker.json'), talkTalker);
+  await fs.writeFile(jsonDoc, talkTalker);
   return res.status(204).end();
-}); */
+});
