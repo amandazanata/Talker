@@ -3,6 +3,8 @@ const crypto = require('crypto');
 const fs = require('fs').promises;
 const path = require('path');
 
+const jsonDoc = path.resolve(__dirname, './talker.json');
+
 const { validaEmail, validaPassword } = require('./middlewares/loginValidations');
 
 const {
@@ -14,9 +16,10 @@ const {
   validaDataQuery,
   valiRate,
   validaRateQuery,
+  /* validaPatch, */
 } = require('./middlewares/talkerValidations');
 
-const readJson = () => fs.readFile(path.resolve(__dirname, './talker.json'));
+const readJson = () => fs.readFile(jsonDoc, 'utf8');
 
 const app = express();
 app.use(express.json());
@@ -26,8 +29,8 @@ const PORT = process.env.PORT || '3001';
 
 // Função de leitura do arquivo .json com módulo fs
 const readTalkerFile = async () => {
-  const data = await readJson();
   try {
+    const data = await readJson();
       const result = JSON.parse(data);
       return result;
     } catch (error) {
@@ -42,35 +45,34 @@ app.get('/', (_request, response) => {
 
 app.listen(PORT, () => {
   console.log('Online');
-  });
+});
 
 // Crie o endpoint GET /talker
 app.get('/talker', async (_req, res) => {
   const data = await readTalkerFile();
-  const array = data.splice(0);
-
+  
   if (!data) {
-    return res.status(200).json(data);
+    return res.status(200).json([]);
   }
-  return res.status(200).json(array);
+  return res.status(200).json(data);
 });
 
-  // Crie o endpoint GET /talker/search & q=searchTerm & rate=rateNumber & date=watchedDate
-  app.get('/talker/search', auth, validaRateQuery, validaDataQuery, async (req, res) => {
-    const { q, rate, date } = req.query;
-    let data = await readTalkerFile();
+// Crie o endpoint GET /talker/search & q=searchTerm & rate=rateNumber & date=watchedDate
+app.get('/talker/search', auth, validaRateQuery, validaDataQuery, async (req, res) => {
+  const { q, rate, date } = req.query;
+  let data = await readTalkerFile();
   
-    if (q) {
-      data = data.filter((talker) => talker.name.includes(q));
-    }
-    if (rate) {
-      data = data.filter(({ talker }) => talker.rate === Number(rate));
-    }
-    if (date) {
-      data = data.filter(({ talker }) => talker.watchedAt === date);
-    }
-    return res.status(200).json(data);
-  });
+  if (q) {
+    data = data.filter((talk) => talk.name.includes(q));
+  }
+  if (rate) {
+    data = data.filter(({ talk }) => talk.rate === Number(rate)); // alterei para o parametro talk
+  }
+  if (date) {
+    data = data.filter(({ talk }) => talk.watchedAt.includes(date));
+  }
+  return res.status(200).json(data);
+});
 
 // Crie o endpoint GET /talker/:id
 app.get('/talker/:id', async (req, res) => {
@@ -136,7 +138,7 @@ valiRate, async (req, res) => {
   await fs.writeFile((path
     .resolve(__dirname, './talker.json')), JSON.stringify(talkerJson, null, 2)); // Zambs ajudou no requisito anterior, usei a mesma forma
     return res.status(200).json(talkerJson[speaker]);
-  });
+});
 
 // Cria o endpoint DELETE /talker/:id - gabarito course, dia 4.4
 app.delete('/talker/:id', auth, async (req, res) => {
@@ -146,3 +148,15 @@ app.delete('/talker/:id', auth, async (req, res) => {
   await fs.writeFile((path.resolve(__dirname, './talker.json')), JSON.stringify(talkerId));
   res.sendStatus(204);
   });
+
+// Crie o endpoint PATCH /talker/rate/:id
+/* app.patch('/talker/rate/:id', auth, validaPatch, async (req, res) => {
+  const { id } = req.params;
+  const { rate } = req.body;
+  const talkerJson = await readTalkerFile();
+  const talkerId = talkerJson.find((talker) => talker.id === +id);
+  talkerId.talk.rate = rate;
+  const talkTalker = JSON.stringify([talkerId]);
+  await fs.writeFile(path.resolve(__dirname, './talker.json'), talkTalker);
+  return res.status(204).end();
+}); */

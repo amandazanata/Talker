@@ -50,7 +50,7 @@ const validaTalk = (req, res, next) => {
 // https://temptable.com.br/2015/10/validar-data-no-formato-ddmmaaaa.html
 const validaWatchedAt = (req, res, next) => {
     const { talk } = req.body;
-    const valiDate = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+    const valiDate = /^\d{2}\/\d{2}\/\d{4}$/;
 
     if (!talk.watchedAt) {
         return res.status(400).json({ message: 'O campo "watchedAt" é obrigatório' });
@@ -66,11 +66,11 @@ const validaWatchedAt = (req, res, next) => {
 
 const validaDataQuery = (req, res, next) => {
     const { date } = req.query;
-    const valiDate = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-2]))(\/)\d{4}$/;
+    const valiDate = /^[0-9]{2}(\/){1}[0-9]{2}(\/){1}[0-9]{4}$/g;
 
     if (date && !valiDate.test(date)) {
         return res.status(400)
-        .json({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
+        .json({ message: 'O parâmetro "date" deve ter o formato "dd/mm/aaaa"' }); // não passava teste porque não alterei para 'parametro'
     }
 
     next();
@@ -78,15 +78,14 @@ const validaDataQuery = (req, res, next) => {
 
 // https://developer.mozilla.org/pt-BR/docs/Web/JavaScript/Reference/Global_Objects/Number/isInteger
 const valiRate = (req, res, next) => {
-    const { talk } = req.body;
-    const valid = () => Number.isInteger(talk.rate) && talk.rate >= 1 && talk.rate <= 5;
+    const { rate } = req.body.talk;
 
-    if (talk.rate === undefined) {
+    if (rate === undefined) {
         return res.status(400)
         .json({ message: 'O campo "rate" é obrigatório' });
     }
 
-    if (!valid()) {
+    if (rate < 1 || rate > 5 || !Number.isInteger(rate)) {
         return res.status(400)
             .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
     }
@@ -96,13 +95,27 @@ const valiRate = (req, res, next) => {
 
 const validaRateQuery = (req, res, next) => {
     const { rate } = req.query;
-    const invalid = () => (!Number.isInteger(Number(rate)) || Number(rate) < 1 || Number(rate) > 5);
+    const invalid = (!Number.isInteger(Number(rate)) || Number(rate) < 1 || Number(rate) > 5);
 
     if (invalid && rate !== undefined) {
         return res.status(400)
             .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
     }
 
+    next();
+};
+
+const validaPatch = (req, res, next) => {
+    const { rate } = req.body;
+
+    if (rate === undefined) {
+        return res.status(400)
+        .json({ message: 'O campo "rate" é obrigatório' });
+    }
+    if ((!Number.isInteger(rate) || Number(rate) < 1 || Number(rate) > 5)) {
+        return res.status(400)
+        .json({ message: 'O campo "rate" deve ser um número inteiro entre 1 e 5' });
+    }
     next();
 };
 
@@ -115,4 +128,5 @@ module.exports = {
     validaDataQuery,
     valiRate,
     validaRateQuery,
+    validaPatch,
 };
