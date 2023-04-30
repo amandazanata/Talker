@@ -152,10 +152,13 @@ app.delete('/talker/:id', auth, async (req, res) => {
 app.patch('/talker/rate/:id', auth, validaPatch, async (req, res) => {
   const { id } = req.params;
   const { rate } = req.body;
+
   const talkerJson = await readTalkerFile();
   const talkerId = talkerJson.find((talker) => talker.id === +id);
+
   talkerId.talk.rate = rate;
   const talkTalker = JSON.stringify([talkerId]);
+
   await fs.writeFile(jsonDoc, talkTalker);
   return res.status(204).end();
 });
